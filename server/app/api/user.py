@@ -14,18 +14,39 @@ from schemas.user import UserCreate, UserResponse, UserBase
 from models.user import User
 from crud import user_crud
 from services.auth_service import (
-    get_current_active_user,
-    require_admin_role,
-    require_librarian_role,
-    check_user_permission
+    protect,
+    restrict_to
 )
 
 router = APIRouter(prefix="/users", tags=["users"])
 
 
+async def require_user_access(
+    user_id: int,
+    current_user: User = Depends(protect)
+) -> User:
+    """
+    Dependency that checks if user can access specific user data.
+    Users can access their own data, librarians and admins can access any data.
+    """
+    # User can access their own data
+    if current_user.id == user_id:
+        return current_user
+
+    # Librarians and admins can access any user's data
+    from models.enums import RoleEnum
+    if current_user.role in [RoleEnum.LIBRARIAN, RoleEnum.ADMIN]:
+        return current_user
+
+    raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail="Not enough permissions to access this user's data"
+    )
+
+
 @router.get("/me", response_model=UserResponse)
 async def get_current_user_profile(
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(protect)
 ):
     """
     Get the current authenticated user's profile.
@@ -65,7 +86,7 @@ async def get_users(
     limit: int = Query(100, ge=1, le=1000, description="Number of users to return"),
     search: Optional[str] = Query(None, description="Search users by name or email"),
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_librarian_role)
+    current_user: User = Depends(restrict_to("librarian", "admin"))
 ):
     """
     Get all users with pagination and optional search.
@@ -84,7 +105,7 @@ async def get_users(
 async def get_user(
     user_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(require_user_access)
 ):
     """
     Get a specific user by ID.
@@ -93,13 +114,7 @@ async def get_user(
 
     - **user_id**: The ID of the user to retrieve
     """
-    # Check permissions
-    if not check_user_permission(current_user, user_id):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Not enough permissions to access this user's data"
-        )
-
+    # Access is already checked by the dependency
     db_user = user_crud.get(db=db, id=user_id)
     if not db_user:
         raise HTTPException(
@@ -113,7 +128,7 @@ async def update_user(
     user_id: int,
     user_update: UserBase,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(require_user_access)
 ):
     """
     Update a specific user by ID.
@@ -125,13 +140,7 @@ async def update_user(
     - **email**: Updated user's email address
     - **role**: Updated user's role
     """
-    # Check permissions
-    if not check_user_permission(current_user, user_id):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Not enough permissions to update this user's data"
-        )
-
+    # Access is already checked by the dependency
     db_user = user_crud.get(db=db, id=user_id)
     if not db_user:
         raise HTTPException(
@@ -151,7 +160,7 @@ async def update_user(
 async def delete_user(
     user_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_admin_role)
+    current_user: User = Depends(restrict_to("admin"))
 ):
     """
     Delete a specific user by ID.
@@ -172,7 +181,7 @@ async def delete_user(
 async def get_user_reservations(
     user_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(require_user_access)
 ):
     """
     Get all reservations for a specific user.
@@ -181,13 +190,7 @@ async def get_user_reservations(
 
     - **user_id**: The ID of the user
     """
-    # Check permissions
-    if not check_user_permission(current_user, user_id):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Not enough permissions to access this user's data"
-        )
-
+    # Access is already checked by the dependency
     # Check if user exists
     db_user = user_crud.get(db=db, id=user_id)
     if not db_user:
@@ -203,7 +206,7 @@ async def get_user_reservations(
 async def get_user_borrows(
     user_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(require_user_access)
 ):
     """
     Get all borrows for a specific user.
@@ -212,13 +215,7 @@ async def get_user_borrows(
 
     - **user_id**: The ID of the user
     """
-    # Check permissions
-    if not check_user_permission(current_user, user_id):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Not enough permissions to access this user's data"
-        )
-
+    # Access is already checked by the dependency
     # Check if user exists
     db_user = user_crud.get(db=db, id=user_id)
     if not db_user:
@@ -234,7 +231,7 @@ async def get_user_borrows(
 async def get_user_payments(
     user_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(require_user_access)
 ):
     """
     Get all payments for a specific user.
@@ -243,13 +240,7 @@ async def get_user_payments(
 
     - **user_id**: The ID of the user
     """
-        # Check permissions
-    if not check_user_permission(current_user, user_id):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Not enough permissions to access this user's data"
-        )
-
+    # Access is already checked by the dependency
     # Check if user exists
     db_user = user_crud.get(db=db, id=user_id)
     if not db_user:

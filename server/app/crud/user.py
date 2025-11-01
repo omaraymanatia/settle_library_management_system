@@ -104,12 +104,5 @@ class CRUDUser(CRUDBase[User, UserCreate, UserBase]):
         # For now, return user (you'll need to implement password checking)
         return user
 
-
-    def is_superuser(self, user: User) -> bool:
-        """Check if user is superuser/admin."""
-        from models.enums import RoleEnum
-        return user.role == RoleEnum.ADMIN
-
-
 # Create instance to be used throughout the app
 user_crud = CRUDUser(User)
