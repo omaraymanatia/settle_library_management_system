@@ -1,8 +1,8 @@
 from datetime import datetime
 from sqlalchemy import Column, Integer, ForeignKey, DateTime, Enum as SqlEnum
 from sqlalchemy.orm import relationship
-from app.database.connection import Base
-from app.models.enums import BorrowStatusEnum
+from database.connection import Base
+from .enums import BorrowStatusEnum
 
 
 class Borrow(Base):

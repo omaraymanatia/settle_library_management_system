@@ -1,8 +1,8 @@
 from datetime import datetime
 from sqlalchemy import Column, Integer, Float, DateTime, Enum as SqlEnum
 from sqlalchemy.orm import relationship
-from app.database.connection import Base
-from app.models.enums import BookClassNameEnum
+from database.connection import Base
+from .enums import BookClassNameEnum
 
 
 class BookClass(Base):

@@ -1,8 +1,8 @@
 from datetime import datetime
 from sqlalchemy import Column, Integer, String, DateTime, Enum as SqlEnum
 from sqlalchemy.orm import relationship
-from app.database.connection import Base
-from app.models.enums import RoleEnum
+from database.connection import Base
+from .enums import RoleEnum
 
 
 class User(Base):
@@ -14,7 +14,6 @@ class User(Base):
     role = Column(SqlEnum(RoleEnum), default=RoleEnum.USER, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
 
-    # relationships
     reservations = relationship("Reservation", back_populates="user", cascade="all, delete")
     borrows = relationship("Borrow", back_populates="user", cascade="all, delete")
     payments = relationship("Payment", back_populates="user", cascade="all, delete")
