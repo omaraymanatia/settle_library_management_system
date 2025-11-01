@@ -30,4 +30,4 @@ class BorrowResponse(BorrowBase):
     payment: Optional[PaymentResponse]
 
     class Config:
-        orm_mode = True
+        from_attributes = True

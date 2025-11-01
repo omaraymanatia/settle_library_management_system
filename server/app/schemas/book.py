@@ -23,4 +23,4 @@ class BookResponse(BookBase):
     book_class: Optional[BookClassResponse]
 
     class Config:
-        orm_mode = True
+        from_attributes = True
