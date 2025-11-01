@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
-from server.app.db.session import Base
+from db.session import Base
 
 
 class Book(Base):

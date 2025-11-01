@@ -1,13 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base, Session
 from typing import Generator
-import os
-from dotenv import load_dotenv
-
-load_dotenv()
-
-DATABASE_URL = os.getenv("DATABASE_URL")
-SQLALCHEMY_DATABASE_URL = DATABASE_URL
+from config import DATABASE_URL
 
 engine = create_engine(DATABASE_URL)
 

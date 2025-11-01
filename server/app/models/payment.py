@@ -1,7 +1,7 @@
 from datetime import datetime
 from sqlalchemy import Column, Integer, Float, DateTime, ForeignKey, Enum as SqlEnum
 from sqlalchemy.orm import relationship
-from server.app.db.session import Base
+from db.session import Base
 from .enums import PaymentTypeEnum, PaymentStatusEnum
 
 

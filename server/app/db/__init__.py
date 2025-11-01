@@ -11,8 +11,7 @@ from .session import (
     Base,
     get_db,
     create_tables,
-    check_db_connection,
-    SQLALCHEMY_DATABASE_URL
+    check_db_connection
 )
 
 __all__ = [
@@ -21,6 +20,5 @@ __all__ = [
     "Base",
     "get_db",
     "create_tables",
-    "check_db_connection",
-    "SQLALCHEMY_DATABASE_URL"
+    "check_db_connection"
 ]
