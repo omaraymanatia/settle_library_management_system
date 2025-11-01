@@ -5,7 +5,7 @@ This package contains database connection, session management,
 and utility functions for database operations.
 """
 
-from .connection import (
+from .session import (
     engine,
     SessionLocal,
     Base,

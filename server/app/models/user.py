@@ -1,7 +1,7 @@
 from datetime import datetime
 from sqlalchemy import Column, Integer, String, DateTime, Enum as SqlEnum
 from sqlalchemy.orm import relationship
-from database.connection import Base
+from server.app.db.session import Base
 from .enums import RoleEnum
 
 
