@@ -12,6 +12,7 @@ class BookClassNameEnum(str, Enum):
 
 
 class ReservationStatusEnum(str, Enum):
+    PENDING = "pending"
     RESERVED = "reserved"
     BORROWED = "borrowed"
     EXPIRED = "expired"
