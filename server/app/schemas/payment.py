@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from datetime import datetime
 from typing import Optional
-from models import PaymentTypeEnum, PaymentStatusEnum
+from models.enums import PaymentTypeEnum, PaymentStatusEnum
 
 
 class PaymentBase(BaseModel):
@@ -12,6 +12,11 @@ class PaymentBase(BaseModel):
 
 class PaymentCreate(PaymentBase):
     user_id: int
+
+
+class PaymentUpdate(BaseModel):
+    amount: Optional[float] = None
+    status: Optional[PaymentStatusEnum] = None
 
 
 class PaymentResponse(PaymentBase):

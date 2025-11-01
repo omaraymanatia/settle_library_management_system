@@ -11,7 +11,7 @@ class Reservation(Base):
     id = Column(Integer, primary_key=True, index=True)
     reservation_date = Column(DateTime, default=datetime.utcnow)
     expiry_date = Column(DateTime, nullable=False)
-    status = Column(SqlEnum(ReservationStatusEnum), default=ReservationStatusEnum.RESERVED)
+    status = Column(SqlEnum(ReservationStatusEnum), default=ReservationStatusEnum.PENDING)
 
     book_id = Column(Integer, ForeignKey("books.id", ondelete="CASCADE"))
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"))

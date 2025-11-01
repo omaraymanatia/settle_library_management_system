@@ -4,6 +4,8 @@ from db.session import engine, Base
 from api.user import router as user_router
 from api.auth import router as auth_router
 from api.book import router as book_router
+from api.reservation import router as reservation_router
+from api.payment import router as payment_router
 import models
 
 Base.metadata.create_all(bind=engine)
@@ -27,6 +29,8 @@ app.add_middleware(
 app.include_router(user_router, prefix="/api/v1")
 app.include_router(auth_router, prefix="/api/v1")
 app.include_router(book_router, prefix="/api/v1")
+app.include_router(reservation_router, prefix="/api/v1")
+app.include_router(payment_router, prefix="/api/v1")
 
 @app.get("/")
 async def root():
