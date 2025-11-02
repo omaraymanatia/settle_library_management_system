@@ -4,18 +4,20 @@ from typing import Optional
 from models.enums import ReservationStatusEnum
 from .book import BookResponse
 from .payment import PaymentResponse
+from .user import UserResponse
 
 
 class ReservationBase(BaseModel):
     reservation_date: Optional[datetime] = None
     expiry_date: datetime
     status: ReservationStatusEnum = ReservationStatusEnum.PENDING
-
-
-class ReservationCreate(ReservationBase):
     book_id: int
     user_id: int
     payment_id: Optional[int] = None
+
+
+class ReservationCreate(ReservationBase):
+    pass
 
 
 class ReservationUpdate(BaseModel):
@@ -26,10 +28,8 @@ class ReservationUpdate(BaseModel):
 
 class ReservationResponse(ReservationBase):
     id: int
-    book_id: int
-    user_id: int
-    payment_id: Optional[int]
     book: Optional[BookResponse] = None
+    user: Optional[UserResponse] = None
     payment: Optional[PaymentResponse] = None
 
     class Config:

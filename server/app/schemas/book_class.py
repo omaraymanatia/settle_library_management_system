@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from datetime import datetime
-from models import BookClassNameEnum
+from models.enums import BookClassNameEnum
 
 
 class BookClassBase(BaseModel):

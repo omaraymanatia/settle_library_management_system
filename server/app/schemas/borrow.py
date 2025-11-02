@@ -13,6 +13,10 @@ class BorrowBase(BaseModel):
     due_date: datetime
     return_date: Optional[datetime] = None
     status: BorrowStatusEnum = BorrowStatusEnum.PENDING_APPROVAL
+    book_id: int
+    user_id: int
+    reservation_id: Optional[int] = None
+    payment_id: Optional[int] = None
 
 
 class BorrowRequest(BaseModel):
@@ -22,10 +26,7 @@ class BorrowRequest(BaseModel):
 
 
 class BorrowCreate(BorrowBase):
-    book_id: int
-    user_id: int
-    reservation_id: Optional[int] = None
-    payment_id: Optional[int] = None
+    pass
 
 
 class BorrowUpdate(BaseModel):
@@ -35,10 +36,6 @@ class BorrowUpdate(BaseModel):
 
 class BorrowResponse(BorrowBase):
     id: int
-    book_id: int
-    user_id: int
-    reservation_id: Optional[int] = None
-    payment_id: Optional[int] = None
     book: Optional[BookResponse] = None
     user: Optional[UserResponse] = None
     payment: Optional[PaymentResponse] = None
@@ -53,4 +50,5 @@ class BorrowApprovalRequest(BaseModel):
 
 
 class BorrowReturnRequest(BaseModel):
-    notes: Optional[str] = Field(None, description="Optional notes about the return")
+    """Request schema for returning a borrowed book."""
+    pass  # No additional fields needed - the borrow_id comes from the URL path
