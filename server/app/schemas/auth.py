@@ -42,6 +42,7 @@ class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
     expires_in: int = ACCESS_TOKEN_EXPIRE_SECONDS  # seconds
+    message: str = "Token generated successfully"
 
 
 class UserInfo(BaseModel):
@@ -58,6 +59,7 @@ class LoginResponse(BaseModel):
     token_type: str = "bearer"
     expires_in: int
     user: UserInfo
+    message: str = "Login successful"
 
 
 class LogoutResponse(BaseModel):
@@ -69,3 +71,4 @@ class VerifyTokenResponse(BaseModel):
     """Token verification response schema."""
     valid: bool = True
     user: UserInfo
+    message: str = "Token is valid"
