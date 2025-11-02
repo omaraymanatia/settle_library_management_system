@@ -29,8 +29,7 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:3000",    # Frontend development server
         "http://127.0.0.1:3000",   # Alternative localhost format
-        "http://localhost:5500",   # VS Code Live Server (common alternative)
-        "http://127.0.0.1:5500"    # Alternative localhost format for Live Server
+        "http://0.0.0.0:3000",    # Docker container format
     ],
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
