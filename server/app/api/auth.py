@@ -51,6 +51,10 @@ async def register(
 
     All new users are registered with USER role by default.
     """
+    import logging
+    logger = logging.getLogger(__name__)
+    logger.info(f"Registration attempt for email: {user_data.email}")
+
     try:
         user_create = UserCreate(
             name=user_data.name,

@@ -21,22 +21,19 @@ from app.services.auth_service import (
 router = APIRouter(prefix="/users", tags=["users"])
 
 
-async def require_user_access(
-    user_id: int,
-    current_user: User = Depends(get_current_user)
-) -> User:
+def check_user_access(user_id: int, current_user: User) -> None:
     """
-    Dependency that checks if user can access specific user data.
+    Helper function that checks if user can access specific user data.
     Users can access their own data, librarians and admins can access any data.
     """
     # User can access their own data
     if current_user.id == user_id:
-        return current_user
+        return
 
     # Librarians and admins can access any user's data
-    from models.enums import RoleEnum
+    from app.models.enums import RoleEnum
     if current_user.role in [RoleEnum.LIBRARIAN, RoleEnum.ADMIN]:
-        return current_user
+        return
 
     raise HTTPException(
         status_code=status.HTTP_403_FORBIDDEN,
@@ -83,6 +80,7 @@ async def create_user(
 
 @router.get("/", response_model=List[UserResponse])
 async def get_users(
+    skip: int = Query(0, ge=0, description="Number of users to skip"),
     limit: int = Query(100, ge=1, le=1000, description="Number of users to return"),
     search: Optional[str] = Query(None, description="Search users by name or email"),
     db: Session = Depends(get_db),
@@ -98,14 +96,14 @@ async def get_users(
     - **search**: Optional search term to filter users by name or email
     """
     users = user_crud.get_multi_with_search(
-        db=db, limit=limit, search=search
+        db=db, skip=skip, limit=limit, search=search
     )
     return users
 @router.get("/{user_id}", response_model=UserResponse)
 async def get_user(
     user_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_user_access)
+    current_user: User = Depends(get_current_user)
 ):
     """
     Get a specific user by ID.
@@ -114,7 +112,9 @@ async def get_user(
 
     - **user_id**: The ID of the user to retrieve
     """
-    # Access is already checked by the dependency
+    # Check access permissions
+    check_user_access(user_id, current_user)
+
     db_user = user_crud.get(db=db, id=user_id)
     if not db_user:
         raise HTTPException(
@@ -128,7 +128,7 @@ async def update_user(
     user_id: int,
     user_update: UserBase,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_user_access)
+    current_user: User = Depends(get_current_user)
 ):
     """
     Update a specific user by ID.
@@ -140,7 +140,9 @@ async def update_user(
     - **email**: Updated user's email address
     - **role**: Updated user's role
     """
-    # Access is already checked by the dependency
+    # Check access permissions
+    check_user_access(user_id, current_user)
+
     db_user = user_crud.get(db=db, id=user_id)
     if not db_user:
         raise HTTPException(
@@ -177,11 +179,11 @@ async def delete_user(
         )
 
     user_crud.remove(db=db, id=user_id)
-@router.get("/{user_id}/reservations")
+@router.get("/{user_id}/reservations", response_model=List)
 async def get_user_reservations(
     user_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_user_access)
+    current_user: User = Depends(get_current_user)
 ):
     """
     Get all reservations for a specific user.
@@ -190,7 +192,9 @@ async def get_user_reservations(
 
     - **user_id**: The ID of the user
     """
-    # Access is already checked by the dependency
+    # Check access permissions
+    check_user_access(user_id, current_user)
+
     # Check if user exists
     db_user = user_crud.get(db=db, id=user_id)
     if not db_user:
@@ -200,13 +204,14 @@ async def get_user_reservations(
         )
 
     # TODO: Implement get user reservations logic
-    # For now, return empty list - this will be implemented when reservation CRUD is ready
-    return []
-@router.get("/{user_id}/borrows")
+    from app.crud.reservation import reservation as crud_reservation
+    reservations = crud_reservation.get_by_user(db, user_id=user_id)
+    return reservations
+@router.get("/{user_id}/borrows", response_model=List)
 async def get_user_borrows(
     user_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_user_access)
+    current_user: User = Depends(get_current_user)
 ):
     """
     Get all borrows for a specific user.
@@ -215,7 +220,9 @@ async def get_user_borrows(
 
     - **user_id**: The ID of the user
     """
-    # Access is already checked by the dependency
+    # Check access permissions
+    check_user_access(user_id, current_user)
+
     # Check if user exists
     db_user = user_crud.get(db=db, id=user_id)
     if not db_user:
@@ -225,13 +232,14 @@ async def get_user_borrows(
         )
 
     # TODO: Implement get user borrows logic
-    # For now, return empty list - this will be implemented when borrow CRUD is ready
-    return []
-@router.get("/{user_id}/payments")
+    from app.crud.borrow import borrow as crud_borrow
+    borrows = crud_borrow.get_by_user(db, user_id=user_id)
+    return borrows
+@router.get("/{user_id}/payments", response_model=List)
 async def get_user_payments(
     user_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_user_access)
+    current_user: User = Depends(get_current_user)
 ):
     """
     Get all payments for a specific user.
@@ -240,7 +248,9 @@ async def get_user_payments(
 
     - **user_id**: The ID of the user
     """
-    # Access is already checked by the dependency
+    # Check access permissions
+    check_user_access(user_id, current_user)
+
     # Check if user exists
     db_user = user_crud.get(db=db, id=user_id)
     if not db_user:
@@ -250,5 +260,6 @@ async def get_user_payments(
         )
 
     # TODO: Implement get user payments logic
-    # For now, return empty list - this will be implemented when payment CRUD is ready
-    return []
+    from app.crud.payment import payment as crud_payment
+    payments = crud_payment.get_by_user(db, user_id=user_id)
+    return payments

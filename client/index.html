@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Management System</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="nav-brand">
+                <h1>📚 Library System</h1>
+            </div>
+            <div class="nav-links">
+                <a href="#books" onclick="showSection('books')">Books</a>
+                <a href="#auth" onclick="showSection('auth')" id="auth-link">Login</a>
+                <a href="#dashboard" onclick="showSection('dashboard')" id="dashboard-link" style="display:none;">Dashboard</a>
+                <button id="logout-btn" onclick="logout()" style="display:none;">Logout</button>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Books Section (Public) -->
+        <section id="books" class="section active">
+            <div class="container">
+                <h2>Available Books</h2>
+
+                <!-- Search Bar -->
+                <div class="search-container">
+                    <input type="text" id="search-input" placeholder="Search books by title, author, or ISBN...">
+                    <button onclick="searchBooks()">Search</button>
+                    <button onclick="loadBooks()">Show All</button>
+                </div>
+
+                <!-- Filters -->
+                <div class="filters">
+                    <label>
+                        <input type="checkbox" id="available-only" onchange="loadBooks()">
+                        Available books only
+                    </label>
+                </div>
+
+                <!-- Books Grid -->
+                <div id="books-grid" class="books-grid">
+                    <!-- Books will be loaded here -->
+                </div>
+
+                <!-- Pagination -->
+                <div id="pagination" class="pagination">
+                    <!-- Pagination will be added here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Authentication Section -->
+        <section id="auth" class="section">
+            <div class="container">
+                <div class="auth-container">
+                    <!-- Login Form -->
+                    <div id="login-form" class="auth-form active">
+                        <h2>Login</h2>
+                        <form onsubmit="login(event)">
+                            <div class="form-group">
+                                <label for="login-email">Email:</label>
+                                <input type="email" id="login-email" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="login-password">Password:</label>
+                                <input type="password" id="login-password" required>
+                            </div>
+                            <button type="submit">Login</button>
+                        </form>
+                        <p>Don't have an account? <a href="#" onclick="toggleAuthForm()">Register here</a></p>
+                    </div>
+
+                    <!-- Register Form -->
+                    <div id="register-form" class="auth-form">
+                        <h2>Register</h2>
+                        <form onsubmit="register(event)">
+                            <div class="form-group">
+                                <label for="register-name">Full Name:</label>
+                                <input type="text" id="register-name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="register-email">Email:</label>
+                                <input type="email" id="register-email" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="register-password">Password:</label>
+                                <input type="password" id="register-password" required>
+                            </div>
+                            <button type="submit">Register</button>
+                        </form>
+                        <p>Already have an account? <a href="#" onclick="toggleAuthForm()">Login here</a></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dashboard Section (Authenticated Users) -->
+        <section id="dashboard" class="section">
+            <div class="container">
+                <h2>My Dashboard</h2>
+
+                <div class="dashboard-tabs">
+                    <button class="tab-btn active" onclick="showTab('my-borrows')">My Borrows</button>
+                    <button class="tab-btn" onclick="showTab('my-reservations')">My Reservations</button>
+                    <button class="tab-btn" onclick="showTab('my-payments')">My Payments</button>
+                </div>
+
+                <!-- My Borrows Tab -->
+                <div id="my-borrows" class="tab-content active">
+                    <h3>My Borrowed Books</h3>
+                    <div id="borrows-list" class="items-list">
+                        <!-- Borrows will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- My Reservations Tab -->
+                <div id="my-reservations" class="tab-content">
+                    <h3>My Reservations</h3>
+                    <div id="reservations-list" class="items-list">
+                        <!-- Reservations will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- My Payments Tab -->
+                <div id="my-payments" class="tab-content">
+                    <h3>My Payments</h3>
+                    <div id="payments-list" class="items-list">
+                        <!-- Payments will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Book Detail Modal -->
+    <div id="book-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <div id="book-details">
+                <!-- Book details will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div id="loading" class="loading">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast" class="toast"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>

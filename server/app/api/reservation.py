@@ -9,7 +9,7 @@ from app.db.session import get_db
 from app.services.auth_service import get_current_user
 from app.services.reservation_service import reservation_service
 from app.schemas.reservation import ReservationResponse
-from app.schemas.user import UserResponse
+from app.models.user import User
 from app.models.enums import ReservationStatusEnum
 
 router = APIRouter(prefix="/reservations", tags=["reservations"])
@@ -19,7 +19,7 @@ router = APIRouter(prefix="/reservations", tags=["reservations"])
 async def create_reservation(
     book_id: int,
     deposit_amount: Optional[float] = None,
-    current_user: UserResponse = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     """
@@ -44,7 +44,7 @@ async def create_reservation(
 async def confirm_reservation_payment(
     reservation_id: int,
     payment_id: int,
-    current_user: UserResponse = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     """
@@ -67,7 +67,7 @@ async def confirm_reservation_payment(
 @router.delete("/{reservation_id}")
 async def cancel_reservation(
     reservation_id: int,
-    current_user: UserResponse = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     """
@@ -94,7 +94,7 @@ async def cancel_reservation(
 async def get_my_reservations(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=100),
-    current_user: UserResponse = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     """Get all reservations for the current user."""
@@ -111,7 +111,7 @@ async def get_book_reservations(
     book_id: int,
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=100),
-    current_user: UserResponse = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     """Get all reservations for a specific book. (Admin or for own reservations)"""
@@ -130,12 +130,12 @@ async def get_book_reservations(
 @router.get("/{reservation_id}", response_model=ReservationResponse)
 async def get_reservation(
     reservation_id: int,
-    current_user: UserResponse = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     """Get a specific reservation by ID."""
 
-    from crud.reservation import reservation as crud_reservation
+    from app.crud.reservation import reservation as crud_reservation
 
     reservation = crud_reservation.get(db, reservation_id)
 
@@ -161,7 +161,7 @@ async def get_all_reservations(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=100),
     status_filter: Optional[ReservationStatusEnum] = Query(None),
-    current_user: UserResponse = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     """Get all reservations (Admin only)."""
@@ -172,7 +172,7 @@ async def get_all_reservations(
             detail="Admin access required"
         )
 
-    from crud.reservation import reservation as crud_reservation
+    from app.crud.reservation import reservation as crud_reservation
 
     if status_filter:
         # You can implement status filtering in CRUD if needed
@@ -186,7 +186,7 @@ async def get_all_reservations(
 
 @router.post("/expire-old", response_model=dict)
 async def expire_old_reservations(
-    current_user: UserResponse = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     """Expire old reservations (Admin only)."""

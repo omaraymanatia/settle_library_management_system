@@ -9,7 +9,7 @@ from app.db.session import get_db
 from app.services.auth_service import get_current_user
 from app.crud.payment import payment as crud_payment
 from app.schemas.payment import PaymentCreate, PaymentResponse, PaymentUpdate
-from app.schemas.user import UserResponse
+from app.models.user import User
 from app.models.enums import PaymentTypeEnum, PaymentStatusEnum
 
 router = APIRouter(prefix="/payments", tags=["payments"])
@@ -18,7 +18,7 @@ router = APIRouter(prefix="/payments", tags=["payments"])
 @router.post("/", response_model=PaymentResponse)
 async def create_payment(
     payment_data: PaymentCreate,
-    current_user: UserResponse = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     """Create a new payment."""
@@ -40,7 +40,7 @@ async def get_my_payments(
     limit: int = Query(100, ge=1, le=100),
     payment_type: Optional[PaymentTypeEnum] = Query(None),
     status_filter: Optional[PaymentStatusEnum] = Query(None),
-    current_user: UserResponse = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     """Get all payments for the current user."""
@@ -59,7 +59,7 @@ async def get_my_payments(
 @router.get("/{payment_id}", response_model=PaymentResponse)
 async def get_payment(
     payment_id: int,
-    current_user: UserResponse = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     """Get a specific payment by ID."""
@@ -86,7 +86,7 @@ async def get_payment(
 async def update_payment(
     payment_id: int,
     payment_update: PaymentUpdate,
-    current_user: UserResponse = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     """Update a payment (typically to mark as paid/failed)."""
@@ -124,7 +124,7 @@ async def get_all_payments(
     limit: int = Query(100, ge=1, le=100),
     payment_type: Optional[PaymentTypeEnum] = Query(None),
     status_filter: Optional[PaymentStatusEnum] = Query(None),
-    current_user: UserResponse = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     """Get all payments (Admin only)."""
@@ -149,7 +149,7 @@ async def get_all_payments(
 async def update_payment_status(
     payment_id: int,
     new_status: PaymentStatusEnum,
-    current_user: UserResponse = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     """Update payment status (Admin only)."""
@@ -173,7 +173,7 @@ async def update_payment_status(
 
 @router.get("/pending/count", response_model=dict)
 async def get_pending_payments_count(
-    current_user: UserResponse = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     """Get count of pending payments (Admin only)."""
