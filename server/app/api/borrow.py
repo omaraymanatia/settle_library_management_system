@@ -31,7 +31,7 @@ from app.services.auth_service import get_current_user, restrict_to
 from app.services.borrow_service import borrow_service
 
 
-router = APIRouter()
+router = APIRouter(prefix="/borrows", tags=["borrows"])
 
 
 def calculate_borrow_fee(db: Session, book_id: int, reservation_id: Optional[int] = None) -> float:

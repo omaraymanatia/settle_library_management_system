@@ -59,13 +59,12 @@ async def get_books(
     search: Optional[str] = Query(None, description="Search books by title, author, or ISBN"),
     book_class_id: Optional[int] = Query(None, description="Filter by book class ID"),
     available_only: bool = Query(False, description="Show only available books"),
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    db: Session = Depends(get_db)
 ):
     """
     Get all books with pagination and optional filters.
 
-    **Requires authentication.**
+    **Public endpoint - no authentication required.**
 
     - **skip**: Number of books to skip (for pagination)
     - **limit**: Maximum number of books to return
@@ -88,13 +87,12 @@ async def get_books(
 async def get_available_books(
     skip: int = Query(0, ge=0, description="Number of books to skip"),
     limit: int = Query(100, ge=1, le=1000, description="Number of books to return"),
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    db: Session = Depends(get_db)
 ):
     """
     Get all books that are currently available for borrowing.
 
-    **Requires authentication.**
+    **Public endpoint - no authentication required.**
 
     - **skip**: Number of books to skip (for pagination)
     - **limit**: Maximum number of books to return
@@ -106,13 +104,12 @@ async def get_available_books(
 @router.get("/{book_id}", response_model=BookResponse)
 async def get_book(
     book_id: int,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    db: Session = Depends(get_db)
 ):
     """
     Get a specific book by ID.
 
-    **Requires authentication.**
+    **Public endpoint - no authentication required.**
 
     - **book_id**: The ID of the book to retrieve
     """
@@ -128,13 +125,12 @@ async def get_book(
 @router.get("/isbn/{isbn}", response_model=BookResponse)
 async def get_book_by_isbn(
     isbn: str,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    db: Session = Depends(get_db)
 ):
     """
     Get a specific book by ISBN.
 
-    **Requires authentication.**
+    **Public endpoint - no authentication required.**
 
     - **isbn**: The ISBN of the book to retrieve
     """

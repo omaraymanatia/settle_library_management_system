@@ -183,7 +183,7 @@ async function loadBooks(page = 1) {
         const searchTerm = document.getElementById('search-input').value;
         const availableOnly = document.getElementById('available-only').checked;
 
-        let url = `${API_BASE_URL}/books?skip=${(page - 1) * itemsPerPage}&limit=${itemsPerPage}`;
+        let url = `${API_BASE_URL}/books/?skip=${(page - 1) * itemsPerPage}&limit=${itemsPerPage}`;
 
         if (searchTerm) {
             url += `&search=${encodeURIComponent(searchTerm)}`;

@@ -4,12 +4,14 @@ from fastapi import Request, HTTPException
 from fastapi.responses import JSONResponse
 import logging
 from app.db.session import engine, Base
-from app.api.user import router as user_router
-from app.api.auth import router as auth_router
-from app.api.book import router as book_router
-from app.api.reservation import router as reservation_router
-from app.api.payment import router as payment_router
-from app.api.borrow import router as borrow_router
+from app.api import (
+    user_router,
+    auth_router,
+    book_router,
+    borrow_router,
+    payment_router,
+    reservation_router
+)
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -20,7 +22,8 @@ Base.metadata.create_all(bind=engine)
 app = FastAPI(
     title="Library Management System",
     description="A comprehensive library management system API",
-    version="1.0.0"
+    version="1.0.0",
+    redirect_slashes=True
 )
 
 # Configure CORS
@@ -29,7 +32,11 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:3000",    # Frontend development server
         "http://127.0.0.1:3000",   # Alternative localhost format
-        "http://0.0.0.0:3000",    # Docker container format
+        "http://0.0.0.0:3000",     # Docker container format
+        "http://localhost:5500",   # Live Server default port
+        "http://127.0.0.1:5500",   # Alternative localhost format
+        "http://localhost:8080",   # Alternative development port
+        "http://127.0.0.1:8080",   # Alternative localhost format
     ],
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
@@ -43,7 +50,8 @@ app.include_router(auth_router, prefix="/api/v1")
 app.include_router(book_router, prefix="/api/v1")
 app.include_router(reservation_router, prefix="/api/v1")
 app.include_router(payment_router, prefix="/api/v1")
-app.include_router(borrow_router, prefix="/api/v1/borrows", tags=["borrows"])
+app.include_router(borrow_router, prefix="/api/v1")
+
 
 @app.get("/")
 async def root():
