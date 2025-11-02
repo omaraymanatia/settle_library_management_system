@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy import Column, Integer, Float, DateTime, Enum as SqlEnum
 from sqlalchemy.orm import relationship
 from db.session import Base
@@ -13,7 +13,7 @@ class BookClass(Base):
     borrow_fee = Column(Float, nullable=False)
     deposit_amount = Column(Float, nullable=False)
     fine_per_day = Column(Float, nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.now(timezone.utc))
 
     # relationships
     books = relationship("Book", back_populates="book_class", cascade="all, delete")

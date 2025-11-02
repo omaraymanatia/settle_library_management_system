@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy import Column, Integer, Float, DateTime, ForeignKey, Enum as SqlEnum
 from sqlalchemy.orm import relationship
 from db.session import Base
@@ -12,7 +12,7 @@ class Payment(Base):
     amount = Column(Float, nullable=False)
     payment_type = Column(SqlEnum(PaymentTypeEnum), nullable=False)
     status = Column(SqlEnum(PaymentStatusEnum), default=PaymentStatusEnum.PENDING)
-    payment_date = Column(DateTime, default=datetime.utcnow)
+    payment_date = Column(DateTime, default=datetime.now(timezone.utc))
 
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"))
 

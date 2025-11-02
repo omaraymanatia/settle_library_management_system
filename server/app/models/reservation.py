@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy import Column, Integer, ForeignKey, DateTime, Enum as SqlEnum
 from sqlalchemy.orm import relationship
 from db.session import Base
@@ -9,7 +9,7 @@ class Reservation(Base):
     __tablename__ = "reservations"
 
     id = Column(Integer, primary_key=True, index=True)
-    reservation_date = Column(DateTime, default=datetime.utcnow)
+    reservation_date = Column(DateTime, default=datetime.now(timezone.utc))
     expiry_date = Column(DateTime, nullable=False)
     status = Column(SqlEnum(ReservationStatusEnum), default=ReservationStatusEnum.PENDING)
 

@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy import Column, Integer, ForeignKey, DateTime, Enum as SqlEnum
 from sqlalchemy.orm import relationship
 from db.session import Base
@@ -9,7 +9,7 @@ class Borrow(Base):
     __tablename__ = "borrows"
 
     id = Column(Integer, primary_key=True, index=True)
-    borrow_date = Column(DateTime, default=datetime.utcnow)
+    borrow_date = Column(DateTime, default=datetime.now(timezone.utc))
     due_date = Column(DateTime, nullable=False)
     return_date = Column(DateTime, nullable=True)
     status = Column(SqlEnum(BorrowStatusEnum), default=BorrowStatusEnum.PENDING_APPROVAL)
