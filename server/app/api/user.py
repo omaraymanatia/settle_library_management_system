@@ -14,7 +14,7 @@ from schemas.user import UserCreate, UserResponse, UserBase
 from models.user import User
 from crud import user_crud
 from services.auth_service import (
-    protect,
+    get_current_user,
     restrict_to
 )
 
@@ -23,7 +23,7 @@ router = APIRouter(prefix="/users", tags=["users"])
 
 async def require_user_access(
     user_id: int,
-    current_user: User = Depends(protect)
+    current_user: User = Depends(get_current_user)
 ) -> User:
     """
     Dependency that checks if user can access specific user data.
@@ -46,7 +46,7 @@ async def require_user_access(
 
 @router.get("/me", response_model=UserResponse)
 async def get_current_user_profile(
-    current_user: User = Depends(protect)
+    current_user: User = Depends(get_current_user)
 ):
     """
     Get the current authenticated user's profile.

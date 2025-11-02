@@ -24,8 +24,6 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 security = HTTPBearer()
 
 
-
-
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verify a password against its hash."""
     return pwd_context.verify(plain_password, hashed_password)
@@ -42,7 +40,7 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     if expires_delta:
         expire = datetime.now(timezone.utc) + expires_delta
     else:
-        expire = datetime.now(timezone.utc) + timedelta(minutes=15)
+        expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=JWT_ALGORITHM)
     return encoded_jwt
@@ -72,17 +70,17 @@ async def get_current_user(
     """
     token = credentials.credentials
 
-
     try:
         payload = verify_token(token)
-        user_id: int = payload.get("sub")
-        if user_id is None:
+        user_id_str = payload.get("sub")
+        if user_id_str is None:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Could not validate credentials",
                 headers={"WWW-Authenticate": "Bearer"},
             )
-    except JWTError:
+        user_id = int(user_id_str)
+    except (JWTError, ValueError):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials",
@@ -113,53 +111,6 @@ async def get_current_active_user(current_user: User = Depends(get_current_user)
     return current_user
 
 
-async def protect(
-    credentials: HTTPAuthorizationCredentials = Depends(security),
-    db: Session = Depends(get_db)
-) -> User:
-    """
-    Authentication middleware - equivalent to your Node.js protect function.
-
-    Checks for valid JWT token and returns the authenticated user.
-    This is the main authentication dependency for protected routes.
-    """
-    token = credentials.credentials
-
-    if not token:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="You are not logged in! Please log in to get access.",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-    try:
-        payload = verify_token(token)
-        user_id: int = payload.get("sub")
-        if user_id is None:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Could not validate credentials",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
-    except JWTError:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Could not validate credentials",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-    # Get current user from database
-    current_user = db.query(User).filter(User.id == user_id).first()
-    if not current_user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="The user belonging to this token does no longer exist.",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-    return current_user
-
-
 def restrict_to(*roles):
     """
     Restrict access to specific roles - equivalent to your Node.js restrictTo function.
@@ -173,7 +124,7 @@ def restrict_to(*roles):
         async def librarian_endpoint(user: User = Depends(restrict_to("librarian", "admin"))):
             pass
     """
-    async def role_checker(current_user: User = Depends(protect)) -> User:
+    async def role_checker(current_user: User = Depends(get_current_user)) -> User:
         # Convert string roles to RoleEnum for comparison
         role_mapping = {
             "user": RoleEnum.USER,

@@ -16,7 +16,7 @@ from models.book import Book
 from models.user import User
 from crud import book_crud
 from services.auth_service import (
-    protect,
+    get_current_user,
     restrict_to
 )
 
@@ -60,7 +60,7 @@ async def get_books(
     book_class_id: Optional[int] = Query(None, description="Filter by book class ID"),
     available_only: bool = Query(False, description="Show only available books"),
     db: Session = Depends(get_db),
-    current_user: User = Depends(protect)
+    current_user: User = Depends(get_current_user)
 ):
     """
     Get all books with pagination and optional filters.
@@ -89,7 +89,7 @@ async def get_available_books(
     skip: int = Query(0, ge=0, description="Number of books to skip"),
     limit: int = Query(100, ge=1, le=1000, description="Number of books to return"),
     db: Session = Depends(get_db),
-    current_user: User = Depends(protect)
+    current_user: User = Depends(get_current_user)
 ):
     """
     Get all books that are currently available for borrowing.
@@ -107,7 +107,7 @@ async def get_available_books(
 async def get_book(
     book_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(protect)
+    current_user: User = Depends(get_current_user)
 ):
     """
     Get a specific book by ID.
@@ -129,7 +129,7 @@ async def get_book(
 async def get_book_by_isbn(
     isbn: str,
     db: Session = Depends(get_db),
-    current_user: User = Depends(protect)
+    current_user: User = Depends(get_current_user)
 ):
     """
     Get a specific book by ISBN.
