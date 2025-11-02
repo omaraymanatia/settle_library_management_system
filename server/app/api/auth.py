@@ -29,7 +29,8 @@ from services.auth_service import (
     create_access_token,
     get_current_active_user,
     security,
-    ACCESS_TOKEN_EXPIRE_MINUTES
+    ACCESS_TOKEN_EXPIRE_MINUTES,
+    authenticate_user
 )
 from models.user import User
 
@@ -93,7 +94,7 @@ async def login(
     - **user**: User information
     """
     # Authenticate user
-    user = user_crud.authenticate(
+    user = authenticate_user(
         db=db, email=login_data.email, password=login_data.password
     )
 

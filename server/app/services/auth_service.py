@@ -34,6 +34,28 @@ def get_password_hash(password: str) -> str:
     return pwd_context.hash(password)
 
 
+def authenticate_user(db: Session, email: str, password: str) -> Optional[User]:
+    """
+    Authenticate user with email and password.
+
+    Args:
+        db: Database session
+        email: User email
+        password: Plain text password
+
+    Returns:
+        User if authentication successful, None otherwise
+    """
+    user = db.query(User).filter(User.email == email).first()
+    if not user:
+        return None
+
+    if not verify_password(password, user.password):
+        return None
+
+    return user
+
+
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     """Create a JWT access token."""
     to_encode = data.copy()

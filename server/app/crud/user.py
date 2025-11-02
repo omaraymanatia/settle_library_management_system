@@ -89,20 +89,5 @@ class CRUDUser(CRUDBase[User, UserCreate, UserBase]):
             return self.search(db, search_term=search, skip=skip, limit=limit)
         return self.get_multi(db, skip=skip, limit=limit)
 
-    def authenticate(self, db: Session, *, email: str, password: str) -> Optional[User]:
-        """Authenticate user with email and password."""
-        from services.auth_service import verify_password
-
-        user = self.get_by_email(db, email=email)
-        if not user:
-            return None
-
-        # Note: You'll need to add password field to User model
-        # if not verify_password(password, user.password):
-        #     return None
-
-        # For now, return user (you'll need to implement password checking)
-        return user
-
 # Create instance to be used throughout the app
 user_crud = CRUDUser(User)

@@ -8,7 +8,7 @@ from typing import List, Optional
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
 from models.user import User
-from schemas.user import UserCreate, UserBase
+from schemas.user import UserCreate, UserBase, UserUpdate
 from services.auth_service import get_password_hash
 
 
@@ -43,8 +43,7 @@ class UserService:
             name=user.name,
             email=user.email,
             role=user.role,
-            # Note: You'll need to add password field to User model
-            # password=hashed_password
+            password=hashed_password
         )
 
         db.add(db_user)
@@ -112,7 +111,7 @@ class UserService:
         return query.offset(skip).limit(limit).all()
 
     @staticmethod
-    def update_user(db: Session, user_id: int, user_update: UserBase) -> Optional[User]:
+    def update_user(db: Session, user_id: int, user_update: UserUpdate) -> Optional[User]:
         """
         Update user.
 
