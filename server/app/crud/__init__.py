@@ -9,6 +9,7 @@ from .user import user_crud
 from .book import book_crud
 from .reservation import reservation
 from .payment import payment
+from .borrow import borrow
 from .base import CRUDBase
 
 __all__ = [
@@ -16,5 +17,6 @@ __all__ = [
     "book_crud",
     "reservation",
     "payment",
+    "borrow",
     "CRUDBase"
 ]

@@ -2,6 +2,7 @@ from enum import Enum
 
 class RoleEnum(str, Enum):
     USER = "user"
+    LIBRARIAN = "librarian"
     ADMIN = "admin"
 
 
@@ -36,3 +37,4 @@ class PaymentTypeEnum(str, Enum):
 class PaymentStatusEnum(str, Enum):
     PAID = "paid"
     PENDING = "pending"
+    FAILED = "failed"

@@ -1,9 +1,11 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from datetime import datetime
 from typing import Optional
 from models import BorrowStatusEnum
 from .book import BookResponse
 from .payment import PaymentResponse
+from .user import UserResponse
+from .reservation import ReservationResponse
 
 
 class BorrowBase(BaseModel):
@@ -13,21 +15,42 @@ class BorrowBase(BaseModel):
     status: BorrowStatusEnum = BorrowStatusEnum.PENDING_APPROVAL
 
 
+class BorrowRequest(BaseModel):
+    book_id: int
+    reservation_id: Optional[int] = None
+    due_date: Optional[datetime] = None  # If not provided, will be calculated based on book class
+
+
 class BorrowCreate(BorrowBase):
     book_id: int
     user_id: int
-    reservation_id: Optional[int]
-    payment_id: Optional[int]
+    reservation_id: Optional[int] = None
+    payment_id: Optional[int] = None
+
+
+class BorrowUpdate(BaseModel):
+    status: Optional[BorrowStatusEnum] = None
+    return_date: Optional[datetime] = None
 
 
 class BorrowResponse(BorrowBase):
     id: int
     book_id: int
     user_id: int
-    reservation_id: Optional[int]
-    payment_id: Optional[int]
-    book: Optional[BookResponse]
-    payment: Optional[PaymentResponse]
+    reservation_id: Optional[int] = None
+    payment_id: Optional[int] = None
+    book: Optional[BookResponse] = None
+    user: Optional[UserResponse] = None
+    payment: Optional[PaymentResponse] = None
+    reservation: Optional[ReservationResponse] = None
 
     class Config:
         from_attributes = True
+
+
+class BorrowApprovalRequest(BaseModel):
+    approve: bool = Field(..., description="True to approve, False to reject")
+
+
+class BorrowReturnRequest(BaseModel):
+    notes: Optional[str] = Field(None, description="Optional notes about the return")
