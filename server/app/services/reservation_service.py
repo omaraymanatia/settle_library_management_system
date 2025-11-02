@@ -2,8 +2,8 @@
 Reservation service containing business logic for reservation operations.
 """
 
-from typing import Optional, Tuple
-from datetime import datetime, timedelta
+from typing import Optional, Tuple, List
+from datetime import datetime, timedelta, timezone
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import and_, or_, select, func
@@ -23,8 +23,8 @@ from config import settings
 
 class ReservationService:
     def __init__(self):
-        self.reservation_expiry_hours = getattr(settings, 'RESERVATION_EXPIRY_HOURS', 24)
-        self.deposit_percentage = getattr(settings, 'DEPOSIT_PERCENTAGE', 0.1)  # 10% of book value
+        self.reservation_expiry_hours = settings.RESERVATION_EXPIRY_HOURS
+        self.deposit_percentage = settings.DEPOSIT_PERCENTAGE
 
     def create_reservation(
         self,
@@ -62,9 +62,13 @@ class ReservationService:
                 )
 
             # Check if user already has an active reservation for this book
-            existing_reservation = crud_reservation.get_active_reservation(
-                db, user_id=user_id, book_id=book_id
-            )
+            existing_reservation = db.query(Reservation).filter(
+                and_(
+                    Reservation.user_id == user_id,
+                    Reservation.book_id == book_id,
+                    Reservation.status.in_([ReservationStatusEnum.PENDING, ReservationStatusEnum.RESERVED])
+                )
+            ).first()
             if existing_reservation:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
@@ -89,7 +93,7 @@ class ReservationService:
             payment = crud_payment.create(db, obj_in=payment_data)
 
             # Create reservation in PENDING status with expiry time
-            expiry_date = datetime.utcnow() + timedelta(hours=self.reservation_expiry_hours)
+            expiry_date = datetime.now(timezone.utc) + timedelta(hours=self.reservation_expiry_hours)
             reservation_data = ReservationCreate(
                 book_id=book_id,
                 user_id=user_id,
@@ -133,10 +137,8 @@ class ReservationService:
         """
 
         try:
-            # Get reservation with payment
-            reservation = crud_reservation.get_reservation_with_paid_deposit(
-                db, reservation_id=reservation_id
-            )
+            # Get reservation
+            reservation = crud_reservation.get(db, reservation_id)
             if not reservation:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
@@ -159,7 +161,7 @@ class ReservationService:
                 )
 
             # Check if reservation is still valid (not expired)
-            if reservation.expiry_date < datetime.utcnow():
+            if reservation.expiry_date < datetime.now(timezone.utc):
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail="Reservation has expired"
@@ -253,10 +255,20 @@ class ReservationService:
     def expire_old_reservations(self, db: Session) -> int:
         """
         Expire old reservations and restore book quantities.
-        This should be called periodically (e.g., via cron job).
+        This should be called periodically (e.g., via cron job or scheduled task).
+        
+        Recommended schedule: Run daily at midnight
+        - Via cron: 0 0 * * * curl -X POST http://localhost:8000/api/v1/reservations/expire-old
+        - Via system scheduler or external service
         """
+        # Get expired reservations
+        expired_reservations = db.query(Reservation).filter(
+            and_(
+                Reservation.expiry_date < datetime.now(timezone.utc),
+                Reservation.status.in_([ReservationStatusEnum.PENDING, ReservationStatusEnum.RESERVED])
+            )
+        ).all()
 
-        expired_reservations = crud_reservation.get_expired_reservations(db)
         count = 0
 
         for reservation in expired_reservations:
@@ -288,7 +300,7 @@ class ReservationService:
         user_id: int,
         skip: int = 0,
         limit: int = 100
-    ) -> list[ReservationResponse]:
+    ) -> List[ReservationResponse]:
         """Get all reservations for a user."""
 
         reservations = crud_reservation.get_by_user(
@@ -304,7 +316,7 @@ class ReservationService:
         book_id: int,
         skip: int = 0,
         limit: int = 100
-    ) -> list[ReservationResponse]:
+    ) -> List[ReservationResponse]:
         """Get all reservations for a book."""
 
         reservations = crud_reservation.get_by_book(

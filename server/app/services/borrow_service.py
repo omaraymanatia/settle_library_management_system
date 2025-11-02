@@ -5,10 +5,13 @@ This module provides business logic for borrow operations,
 including overdue handling and fine calculations.
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from crud import borrow, payment
+from models.borrow import Borrow
+from models.payment import Payment
 from models.enums import PaymentTypeEnum, PaymentStatusEnum, BorrowStatusEnum
 from schemas.payment import PaymentCreate
 
@@ -27,23 +30,22 @@ class BorrowService:
 
         for borrow_obj in overdue_borrows:
             try:
-                # Calculate fine amount
-                days_late = (datetime.utcnow() - borrow_obj.due_date).days
-                if days_late <= 0:
+                # Calculate fine amount using the dedicated method
+                fine_amount = BorrowService.calculate_fine(borrow_obj)
+                if fine_amount <= 0:
                     continue
 
-                fine_amount = days_late * borrow_obj.book.book_class.fine_per_day
+                # Calculate days late for reporting
+                days_late = (datetime.now(timezone.utc) - borrow_obj.due_date).days
 
                 # Check if fine payment already exists for this borrow
                 existing_fine = (
-                    db.query(payment.model)
+                    db.query(Payment)
                     .filter(
-                        payment.model.user_id == borrow_obj.user_id,
-                        payment.model.payment_type == PaymentTypeEnum.FINE,
-                        payment.model.status == PaymentStatusEnum.PENDING
+                        Payment.user_id == borrow_obj.user_id,
+                        Payment.payment_type == PaymentTypeEnum.FINE,
+                        Payment.status == PaymentStatusEnum.PENDING
                     )
-                    .join(borrow.model)
-                    .filter(borrow.model.id == borrow_obj.id)
                     .first()
                 )
 
@@ -111,7 +113,7 @@ class BorrowService:
         if borrow_obj.return_date:
             days_late = (borrow_obj.return_date - borrow_obj.due_date).days
         else:
-            days_late = (datetime.utcnow() - borrow_obj.due_date).days
+            days_late = (datetime.now(timezone.utc) - borrow_obj.due_date).days
 
         if days_late <= 0:
             return 0.0
@@ -122,16 +124,25 @@ class BorrowService:
     def get_borrow_statistics(db: Session) -> dict:
         """Get borrow statistics for dashboard."""
         stats = {
-            "total_borrows": len(borrow.get_multi(db, limit=10000)),
-            "pending_approval": len(borrow.get_pending_approval(db, limit=10000)),
-            "pending_return": len(borrow.get_pending_return(db, limit=10000)),
-            "overdue": len(borrow.get_overdue_borrows(db)),
+            "total_borrows": db.query(func.count(Borrow.id)).scalar(),
+            "pending_approval": db.query(func.count(Borrow.id)).filter(
+                Borrow.status == BorrowStatusEnum.PENDING_APPROVAL
+            ).scalar(),
+            "pending_return": db.query(func.count(Borrow.id)).filter(
+                Borrow.status == BorrowStatusEnum.RETURN_PENDING
+            ).scalar(),
+            "overdue": db.query(func.count(Borrow.id)).filter(
+                Borrow.due_date < datetime.now(timezone.utc),
+                Borrow.status == BorrowStatusEnum.BORROWED
+            ).scalar(),
             "by_status": {}
         }
 
         # Get counts by status
         for status in BorrowStatusEnum:
-            count = len(borrow.get_by_status(db, status=status, limit=10000))
+            count = db.query(func.count(Borrow.id)).filter(
+                Borrow.status == status
+            ).scalar()
             stats["by_status"][status.value] = count
 
         return stats
