@@ -5,6 +5,10 @@ Authentication schemas for request/response models.
 from pydantic import BaseModel, EmailStr
 from datetime import datetime
 from models.enums import RoleEnum
+from config import ACCESS_TOKEN_EXPIRE_MINUTES
+
+# Token expiry time in seconds
+ACCESS_TOKEN_EXPIRE_SECONDS = ACCESS_TOKEN_EXPIRE_MINUTES * 60
 
 
 class RegisterRequest(BaseModel):
@@ -37,7 +41,7 @@ class TokenResponse(BaseModel):
     """Token response schema."""
     access_token: str
     token_type: str = "bearer"
-    expires_in: int  # seconds
+    expires_in: int = ACCESS_TOKEN_EXPIRE_SECONDS  # seconds
 
 
 class UserInfo(BaseModel):
