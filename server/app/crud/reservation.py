@@ -6,10 +6,10 @@ from typing import List, Optional
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import and_, or_
 from datetime import datetime
-from crud.base import CRUDBase
-from models.reservation import Reservation
-from models.enums import ReservationStatusEnum, PaymentStatusEnum
-from schemas.reservation import ReservationCreate, ReservationBase
+from app.crud.base import CRUDBase
+from app.models.reservation import Reservation
+from app.models.enums import ReservationStatusEnum, PaymentStatusEnum
+from app.schemas.reservation import ReservationCreate, ReservationBase
 
 
 class CRUDReservation(CRUDBase[Reservation, ReservationCreate, ReservationBase]):

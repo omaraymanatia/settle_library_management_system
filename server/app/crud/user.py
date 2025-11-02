@@ -7,10 +7,10 @@ This module contains CRUD operations specific to the User model.
 from typing import List, Optional
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
-from crud.base import CRUDBase
-from models.user import User
-from schemas.user import UserCreate, UserBase
-from services.auth_service import get_password_hash
+from app.crud.base import CRUDBase
+from app.models.user import User
+from app.schemas.user import UserCreate, UserBase
+from app.services.auth_service import get_password_hash
 
 
 class CRUDUser(CRUDBase[User, UserCreate, UserBase]):
@@ -35,8 +35,7 @@ class CRUDUser(CRUDBase[User, UserCreate, UserBase]):
 
         # Create user object
         db_obj = User(**create_data)
-        # Note: You'll need to add password field to User model
-        # db_obj.password = hashed_password
+        db_obj.password = hashed_password
 
         db.add(db_obj)
         db.commit()

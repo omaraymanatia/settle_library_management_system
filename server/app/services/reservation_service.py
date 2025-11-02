@@ -9,16 +9,16 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy import and_, or_, select, func
 from fastapi import HTTPException, status
 
-from crud.reservation import reservation as crud_reservation
-from crud.payment import payment as crud_payment
-from crud.book import book_crud
-from models.book import Book
-from models.reservation import Reservation
-from models.payment import Payment
-from models.enums import ReservationStatusEnum, PaymentStatusEnum, PaymentTypeEnum
-from schemas.reservation import ReservationCreate, ReservationResponse
-from schemas.payment import PaymentCreate
-from config import settings
+from app.crud.reservation import reservation as crud_reservation
+from app.crud.payment import payment as crud_payment
+from app.crud.book import book_crud
+from app.models.book import Book
+from app.models.reservation import Reservation
+from app.models.payment import Payment
+from app.models.enums import ReservationStatusEnum, PaymentStatusEnum, PaymentTypeEnum
+from app.schemas.reservation import ReservationCreate, ReservationResponse
+from app.schemas.payment import PaymentCreate
+from app.config import settings
 
 
 class ReservationService:
@@ -255,11 +255,7 @@ class ReservationService:
     def expire_old_reservations(self, db: Session) -> int:
         """
         Expire old reservations and restore book quantities.
-        This should be called periodically (e.g., via cron job or scheduled task).
-        
-        Recommended schedule: Run daily at midnight
-        - Via cron: 0 0 * * * curl -X POST http://localhost:8000/api/v1/reservations/expire-old
-        - Via system scheduler or external service
+        This should be called periodically (e.g., via cron job).
         """
         # Get expired reservations
         expired_reservations = db.query(Reservation).filter(

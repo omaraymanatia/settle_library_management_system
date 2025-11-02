@@ -10,12 +10,12 @@ This module contains all book-related API endpoints including:
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
-from db.session import get_db
-from schemas.book import BookCreate, BookResponse, BookBase
-from models.book import Book
-from models.user import User
-from crud import book_crud
-from services.auth_service import (
+from app.db.session import get_db
+from app.schemas.book import BookCreate, BookResponse, BookBase
+from app.models.book import Book
+from app.models.user import User
+from app.crud import book_crud
+from app.services.auth_service import (
     get_current_user,
     restrict_to
 )

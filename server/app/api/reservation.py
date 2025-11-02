@@ -5,12 +5,12 @@ Reservation API endpoints.
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
-from db.session import get_db
-from services.auth_service import get_current_user
-from services.reservation_service import reservation_service
-from schemas.reservation import ReservationResponse
-from schemas.user import UserResponse
-from models.enums import ReservationStatusEnum
+from app.db.session import get_db
+from app.services.auth_service import get_current_user
+from app.services.reservation_service import reservation_service
+from app.schemas.reservation import ReservationResponse
+from app.schemas.user import UserResponse
+from app.models.enums import ReservationStatusEnum
 
 router = APIRouter(prefix="/reservations", tags=["reservations"])
 

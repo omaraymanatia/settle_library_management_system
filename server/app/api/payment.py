@@ -5,12 +5,12 @@ Payment API endpoints.
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
-from db.session import get_db
-from services.auth_service import get_current_user
-from crud.payment import payment as crud_payment
-from schemas.payment import PaymentCreate, PaymentResponse, PaymentUpdate
-from schemas.user import UserResponse
-from models.enums import PaymentTypeEnum, PaymentStatusEnum
+from app.db.session import get_db
+from app.services.auth_service import get_current_user
+from app.crud.payment import payment as crud_payment
+from app.schemas.payment import PaymentCreate, PaymentResponse, PaymentUpdate
+from app.schemas.user import UserResponse
+from app.models.enums import PaymentTypeEnum, PaymentStatusEnum
 
 router = APIRouter(prefix="/payments", tags=["payments"])
 

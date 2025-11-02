@@ -4,7 +4,7 @@ from .book import BookBase, BookCreate, BookResponse
 from .payment import PaymentBase, PaymentCreate, PaymentResponse
 from .reservation import ReservationBase, ReservationCreate, ReservationResponse
 from .borrow import BorrowBase, BorrowCreate, BorrowResponse
-from models import (
+from app.models.enums import (
     RoleEnum,
     BookClassNameEnum,
     ReservationStatusEnum,

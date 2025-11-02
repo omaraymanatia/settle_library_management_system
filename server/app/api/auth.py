@@ -11,9 +11,9 @@ from datetime import timedelta
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
-from db.session import get_db
-from schemas.user import UserCreate, UserResponse
-from schemas.auth import (
+from app.db.session import get_db
+from app.schemas.user import UserCreate, UserResponse
+from app.schemas.auth import (
     RegisterRequest,
     RegisterResponse,
     LoginRequest,
@@ -23,16 +23,16 @@ from schemas.auth import (
     LogoutResponse,
     VerifyTokenResponse
 )
-from models.enums import RoleEnum
-from crud import user_crud
-from services.auth_service import (
+from app.models.enums import RoleEnum
+from app.crud import user_crud
+from app.services.auth_service import (
     create_access_token,
     get_current_active_user,
     security,
-    ACCESS_TOKEN_EXPIRE_MINUTES,
     authenticate_user
 )
-from models.user import User
+from app.config import ACCESS_TOKEN_EXPIRE_MINUTES
+from app.models.user import User
 
 router = APIRouter(prefix="/auth", tags=["authentication"])
 
@@ -125,6 +125,8 @@ async def login(
         expires_in=ACCESS_TOKEN_EXPIRE_MINUTES * 60,  # Convert to seconds
         user=user_info
     )
+
+
 @router.post("/logout", response_model=LogoutResponse)
 async def logout(
     current_user: User = Depends(get_current_active_user)
@@ -138,6 +140,8 @@ async def logout(
     by removing the token. This endpoint confirms the logout action.
     """
     return LogoutResponse(message="Successfully logged out")
+
+
 @router.post("/refresh", response_model=TokenResponse)
 async def refresh_token(
     current_user: User = Depends(get_current_active_user)

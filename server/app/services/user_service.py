@@ -7,9 +7,9 @@ This module contains business logic for user operations.
 from typing import List, Optional
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
-from models.user import User
-from schemas.user import UserCreate, UserBase, UserUpdate
-from services.auth_service import get_password_hash
+from app.models.user import User
+from app.schemas.user import UserCreate, UserBase, UserUpdate
+from app.services.auth_service import get_password_hash
 
 
 class UserService:

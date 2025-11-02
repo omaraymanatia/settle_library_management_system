@@ -7,9 +7,9 @@ This module contains CRUD operations specific to the Book model.
 from typing import List, Optional
 from sqlalchemy.orm import Session
 from sqlalchemy import or_, and_
-from crud.base import CRUDBase
-from models.book import Book
-from schemas.book import BookCreate, BookBase
+from app.crud.base import CRUDBase
+from app.models.book import Book
+from app.schemas.book import BookCreate, BookBase
 
 
 class CRUDBook(CRUDBase[Book, BookCreate, BookBase]):

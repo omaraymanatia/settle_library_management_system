@@ -5,10 +5,10 @@ CRUD operations for payments.
 from typing import List, Optional
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import and_
-from crud.base import CRUDBase
-from models.payment import Payment
-from models.enums import PaymentTypeEnum, PaymentStatusEnum
-from schemas.payment import PaymentCreate, PaymentBase
+from app.crud.base import CRUDBase
+from app.models.payment import Payment
+from app.models.enums import PaymentTypeEnum, PaymentStatusEnum
+from app.schemas.payment import PaymentCreate, PaymentBase
 
 
 class CRUDPayment(CRUDBase[Payment, PaymentCreate, PaymentBase]):

@@ -2,14 +2,13 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import Request, HTTPException
 from fastapi.responses import JSONResponse
-from db.session import engine, Base
-from api.user import router as user_router
-from api.auth import router as auth_router
-from api.book import router as book_router
-from api.reservation import router as reservation_router
-from api.payment import router as payment_router
-from api.borrow import router as borrow_router
-import models
+from app.db.session import engine, Base
+from app.api.user import router as user_router
+from app.api.auth import router as auth_router
+from app.api.book import router as book_router
+from app.api.reservation import router as reservation_router
+from app.api.payment import router as payment_router
+from app.api.borrow import router as borrow_router
 
 Base.metadata.create_all(bind=engine)
 

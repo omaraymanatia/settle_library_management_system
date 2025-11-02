@@ -7,28 +7,28 @@ from datetime import datetime, timedelta
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from db.session import get_db
-from models.user import User
-from models.book import Book
-from models.reservation import Reservation
-from models.payment import Payment
-from models.enums import (
+from app.db.session import get_db
+from app.models.user import User
+from app.models.book import Book
+from app.models.reservation import Reservation
+from app.models.payment import Payment
+from app.models.enums import (
     BorrowStatusEnum,
     PaymentStatusEnum,
     PaymentTypeEnum,
     ReservationStatusEnum,
     RoleEnum
 )
-from schemas.borrow import (
+from app.schemas.borrow import (
     BorrowRequest,
     BorrowResponse,
     BorrowApprovalRequest,
     BorrowReturnRequest
 )
-from schemas.payment import PaymentCreate
-from crud import borrow, book_crud as book, reservation, payment, user_crud as user
-from services.auth_service import get_current_user, restrict_to
-from services.borrow_service import borrow_service
+from app.schemas.payment import PaymentCreate
+from app.crud import borrow, book_crud as book, reservation, payment, user_crud as user
+from app.services.auth_service import get_current_user, restrict_to
+from app.services.borrow_service import borrow_service
 
 
 router = APIRouter()

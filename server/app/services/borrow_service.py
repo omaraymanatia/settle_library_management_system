@@ -5,15 +5,21 @@ This module provides business logic for borrow operations,
 including overdue handling and fine calculations.
 """
 
-from datetime import datetime, timezone
-from typing import List
+from typing import Optional, List, Tuple
+from datetime import datetime, timedelta, timezone
 from sqlalchemy.orm import Session
-from sqlalchemy import func
-from crud import borrow, payment
-from models.borrow import Borrow
-from models.payment import Payment
-from models.enums import PaymentTypeEnum, PaymentStatusEnum, BorrowStatusEnum
-from schemas.payment import PaymentCreate
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy import and_, or_, select, func
+from fastapi import HTTPException, status
+
+from app.crud.borrow import borrow as borrow_crud
+from app.crud.payment import payment as crud_payment
+from app.crud.reservation import reservation as crud_reservation
+from app.crud.book import book_crud
+from app.models.borrow import Borrow
+from app.models.payment import Payment
+from app.models.enums import PaymentTypeEnum, PaymentStatusEnum, BorrowStatusEnum
+from app.schemas.payment import PaymentCreate
 
 
 class BorrowService:
@@ -25,7 +31,7 @@ class BorrowService:
         Process all overdue borrows and create fine payments.
         Returns a list of processed borrow information.
         """
-        overdue_borrows = borrow.get_overdue_borrows(db)
+        overdue_borrows = borrow_crud.get_overdue_borrows(db)
         processed = []
 
         for borrow_obj in overdue_borrows:
@@ -57,7 +63,7 @@ class BorrowService:
                         status=PaymentStatusEnum.PENDING,
                         user_id=borrow_obj.user_id
                     )
-                    fine_payment = payment.create(db, obj_in=fine_payment_data)
+                    fine_payment = crud_payment.create(db, obj_in=fine_payment_data)
 
                     processed.append({
                         "borrow_id": borrow_obj.id,
@@ -70,7 +76,7 @@ class BorrowService:
                     })
 
                 # Mark borrow as late
-                borrow.mark_as_late(db, borrow_id=borrow_obj.id)
+                borrow_crud.mark_as_late(db, borrow_id=borrow_obj.id)
 
             except Exception as e:
                 processed.append({

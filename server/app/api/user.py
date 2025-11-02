@@ -9,11 +9,11 @@ This module contains all user-related API endpoints including:
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
-from db.session import get_db
-from schemas.user import UserCreate, UserResponse, UserBase
-from models.user import User
-from crud import user_crud
-from services.auth_service import (
+from app.db.session import get_db
+from app.schemas.user import UserCreate, UserResponse, UserBase
+from app.models.user import User
+from app.crud import user_crud
+from app.services.auth_service import (
     get_current_user,
     restrict_to
 )

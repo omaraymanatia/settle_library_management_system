@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from datetime import datetime
 from typing import Optional, List
-from models.enums import PaymentTypeEnum, PaymentStatusEnum
+from app.models.enums import PaymentTypeEnum, PaymentStatusEnum
 
 
 class PaymentBase(BaseModel):

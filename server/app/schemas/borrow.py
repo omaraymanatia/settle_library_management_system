@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field
 from datetime import datetime
 from typing import Optional
-from models import BorrowStatusEnum
+from app.models.enums import BorrowStatusEnum
 from .book import BookResponse
 from .payment import PaymentResponse
 from .user import UserResponse
