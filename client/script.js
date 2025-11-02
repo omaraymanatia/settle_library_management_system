@@ -10,6 +10,32 @@ document.addEventListener('DOMContentLoaded', function() {
     loadBooks();
 });
 
+// Debug Functions
+function debugAuth() {
+    const token = localStorage.getItem('token');
+    const user = localStorage.getItem('user');
+
+    console.log('🔍 Auth Debug Info:');
+    console.log('Token exists:', !!token);
+    console.log('Token:', token ? token.substring(0, 50) + '...' : 'null');
+    console.log('User:', user ? JSON.parse(user) : 'null');
+
+    if (token) {
+        try {
+            // Decode JWT payload (without verification)
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            console.log('Token payload:', payload);
+            console.log('Token expires:', new Date(payload.exp * 1000));
+            console.log('Token expired:', Date.now() > payload.exp * 1000);
+        } catch (e) {
+            console.log('Error decoding token:', e);
+        }
+    }
+}
+
+// Add to window for console access
+window.debugAuth = debugAuth;
+
 // Authentication Management
 function checkAuthStatus() {
     const token = localStorage.getItem('token');
@@ -82,6 +108,12 @@ async function login(event) {
     const email = document.getElementById('login-email').value;
     const password = document.getElementById('login-password').value;
 
+    // Validate password length (bcrypt limitation)
+    if (new Blob([password]).size > 72) {
+        showToast('Password is too long (maximum 72 bytes)', 'error');
+        return;
+    }
+
     showLoading(true);
 
     try {
@@ -104,6 +136,9 @@ async function login(event) {
             showToast('Login successful!', 'success');
             showSection('books');
 
+            // Reload books to show updated UI with login status
+            loadBooks(currentPage);
+
             // Clear form
             document.getElementById('login-email').value = '';
             document.getElementById('login-password').value = '';
@@ -124,6 +159,12 @@ async function register(event) {
     const name = document.getElementById('register-name').value;
     const email = document.getElementById('register-email').value;
     const password = document.getElementById('register-password').value;
+
+    // Validate password length (bcrypt limitation)
+    if (new Blob([password]).size > 72) {
+        showToast('Password is too long (maximum 72 bytes)', 'error');
+        return;
+    }
 
     showLoading(true);
 
@@ -164,6 +205,9 @@ function logout() {
     updateUIForLoggedOutUser();
     showToast('Logged out successfully', 'success');
     showSection('books');
+
+    // Reload books to show updated UI without login status
+    loadBooks(currentPage);
 }
 
 function toggleAuthForm() {
@@ -315,7 +359,7 @@ async function borrowBook(bookId) {
     showLoading(true);
 
     try {
-        const response = await fetch(`${API_BASE_URL}/borrow/request`, {
+        const response = await fetch(`${API_BASE_URL}/borrows/request`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -350,13 +394,12 @@ async function reserveBook(bookId) {
     showLoading(true);
 
     try {
-        const response = await fetch(`${API_BASE_URL}/reservations/`, {
+        const response = await fetch(`${API_BASE_URL}/reservations/?book_id=${bookId}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
-            },
-            body: JSON.stringify({ book_id: bookId })
+            }
         });
 
         const data = await response.json();
@@ -386,7 +429,7 @@ async function loadUserBorrows() {
     showLoading(true);
 
     try {
-        const response = await fetch(`${API_BASE_URL}/borrow/my-borrows`, {
+        const response = await fetch(`${API_BASE_URL}/borrows/my-borrows`, {
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
             }
@@ -546,7 +589,7 @@ async function requestReturn(borrowId) {
     showLoading(true);
 
     try {
-        const response = await fetch(`${API_BASE_URL}/borrow/${borrowId}/request-return`, {
+        const response = await fetch(`${API_BASE_URL}/borrows/${borrowId}/request-return`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`

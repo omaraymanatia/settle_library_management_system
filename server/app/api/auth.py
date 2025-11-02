@@ -55,6 +55,13 @@ async def register(
     logger = logging.getLogger(__name__)
     logger.info(f"Registration attempt for email: {user_data.email}")
 
+    # Validate password length (bcrypt limitation)
+    if len(user_data.password.encode('utf-8')) > 72:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Password cannot be longer than 72 bytes"
+        )
+
     try:
         user_create = UserCreate(
             name=user_data.name,
@@ -97,6 +104,13 @@ async def login(
     - **expires_in**: Token expiration time in seconds
     - **user**: User information
     """
+    # Validate password length (bcrypt limitation)
+    if len(login_data.password.encode('utf-8')) > 72:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Password cannot be longer than 72 bytes"
+        )
+
     # Authenticate user
     user = authenticate_user(
         db=db, email=login_data.email, password=login_data.password
