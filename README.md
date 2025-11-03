@@ -21,6 +21,11 @@ server/
 └── requirements.txt      # Python dependencies
 ```
 
+## System Design Graphs
+
+[System Design Graphs](https://docs.google.com/document/d/1E7a0Qi60uQnet3G5HxHb0EONAEhbv8EWwWbS5lI2PY4/edit?usp=sharing)
+
+
 ## 🚀 Getting Started
 
 ### Prerequisites
