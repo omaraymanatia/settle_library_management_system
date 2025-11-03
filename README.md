@@ -530,58 +530,7 @@ Update payment status.
 - `BORROW_FEE`: Book borrowing fee
 - `FINE`: Overdue fine
 
-## 🧪 Testing
 
-### Manual Testing
-1. **Start the server:** `python start_server.py`
-2. **Visit Swagger UI:** `http://localhost:8000/docs`
-3. **Test endpoints** using the interactive documentation
-
-### Database Testing
-- **Check data:** `python check_database.py`
-- **Reset and seed:** `python seed_database.py`
-
-## 🔧 Configuration
-
-### Environment Variables
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `DATABASE_URL` | PostgreSQL connection string | Required |
-| `SECRET_KEY` | JWT signing secret | Required |
-| `JWT_ALGORITHM` | JWT algorithm | `HS256` |
-| `ACCESS_TOKEN_EXPIRE_MINUTES` | Token expiry time | `30` |
-| `DEBUG` | Debug mode | `False` |
-| `ENVIRONMENT` | Environment name | `development` |
-| `RESERVATION_EXPIRY_HOURS` | Reservation expiry | `24` |
-| `DEPOSIT_PERCENTAGE` | Deposit percentage | `0.1` |
-
-### CORS Configuration
-The API allows requests from:
-- `http://localhost:3000` (React development)
-- `http://localhost:5500` (Live Server)
-- `http://localhost:8080` (Alternative development)
-
-## 🚨 Error Handling
-
-### Common HTTP Status Codes
-- `200`: Success
-- `201`: Created
-- `204`: No Content (successful deletion)
-- `400`: Bad Request (validation errors)
-- `401`: Unauthorized (authentication required)
-- `403`: Forbidden (insufficient permissions)
-- `404`: Not Found
-- `500`: Internal Server Error
-
-### Error Response Format
-```json
-{
-  "error": "Error Type",
-  "message": "Detailed error message",
-  "status_code": 400
-}
-```
 
 ## 📦 Dependencies
 
@@ -595,54 +544,14 @@ The API allows requests from:
 - **Passlib**: Password hashing
 - **Python-dotenv**: Environment variable management
 
-### Development Dependencies
-- **Alembic**: Database migrations
-
-## 🔄 Database Migrations
-
-While the current setup uses `Base.metadata.create_all()` for simplicity, Alembic is included for future migration needs:
-
-```bash
-# Initialize migrations (when needed)
-alembic init alembic
-
-# Create migration
-alembic revision --autogenerate -m "Description"
-
-# Apply migrations
-alembic upgrade head
-```
 
 ## 🎯 Future Enhancements
 
 ### Planned Features
 - [ ] Email notifications for overdue books
-- [ ] Advanced search and filtering
 - [ ] Book recommendations
-- [ ] Reading history and analytics
-- [ ] Multi-branch library support
-- [ ] Mobile app integration API
-- [ ] Automated fine calculations
 - [ ] Book review and rating system
 
 ### Technical Improvements
 - [ ] Redis caching for frequently accessed data
-- [ ] Background task processing with Celery
 - [ ] API rate limiting
-- [ ] Comprehensive test suite
-- [ ] Docker containerization
-- [ ] CI/CD pipeline
-- [ ] Monitoring and logging
-- [ ] API versioning strategy
-
-## 📞 Support
-
-For issues, questions, or contributions:
-1. Check the interactive API documentation at `/docs`
-2. Review the database seeding and checking scripts
-3. Examine the source code for detailed implementation
-4. Test endpoints using the provided sample data
-
----
-
-**Built with ❤️ using FastAPI, SQLAlchemy, and PostgreSQL**
