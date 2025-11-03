@@ -58,10 +58,13 @@ async def get_current_user_profile(
 @router.post("/", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 async def create_user(
     user: UserCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(restrict_to("librarian", "admin"))
 ):
     """
     Create a new user.
+
+    **Requires librarian or admin role.**
 
     - **name**: User's full name
     - **email**: User's email address (must be unique)
@@ -134,11 +137,12 @@ async def update_user(
     Update a specific user by ID.
 
     **Requires authentication. Users can only update their own data unless they are librarian/admin.**
+    **Role changes require librarian/admin privileges.**
 
     - **user_id**: The ID of the user to update
     - **name**: Updated user's full name
     - **email**: Updated user's email address
-    - **role**: Updated user's role
+    - **role**: Updated user's role (requires librarian/admin to change)
     """
     # Check access permissions
     check_user_access(user_id, current_user)
@@ -149,6 +153,17 @@ async def update_user(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="User not found"
         )
+
+    # Additional check: Role changes require higher privileges
+    from app.models.enums import RoleEnum
+    if hasattr(user_update, 'role') and user_update.role is not None:
+        # If role is being changed and user is not librarian/admin
+        if (user_update.role != db_user.role and
+            current_user.role not in [RoleEnum.LIBRARIAN, RoleEnum.ADMIN]):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Insufficient permissions to change user role"
+            )
 
     try:
         updated_user = user_crud.update(db=db, db_obj=db_user, obj_in=user_update)

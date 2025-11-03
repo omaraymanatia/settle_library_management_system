@@ -27,17 +27,37 @@ security = HTTPBearer()
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verify a password against its hash."""
     # Truncate password to 72 bytes to avoid bcrypt limitation
-    if len(plain_password.encode('utf-8')) > 72:
-        plain_password = plain_password.encode('utf-8')[:72].decode('utf-8', errors='ignore')
-    return pwd_context.verify(plain_password, hashed_password)
+    password_bytes = plain_password.encode('utf-8')
+    if len(password_bytes) > 72:
+        password_bytes = password_bytes[:72]
+        plain_password = password_bytes.decode('utf-8', errors='ignore')
+
+    try:
+        return pwd_context.verify(plain_password, hashed_password)
+    except ValueError as e:
+        if "password cannot be longer than 72 bytes" in str(e):
+            # Further truncate if still too long
+            plain_password = plain_password[:70]  # Be more conservative
+            return pwd_context.verify(plain_password, hashed_password)
+        raise e
 
 
 def get_password_hash(password: str) -> str:
     """Hash a password."""
     # Truncate password to 72 bytes to avoid bcrypt limitation
-    if len(password.encode('utf-8')) > 72:
-        password = password.encode('utf-8')[:72].decode('utf-8', errors='ignore')
-    return pwd_context.hash(password)
+    password_bytes = password.encode('utf-8')
+    if len(password_bytes) > 72:
+        password_bytes = password_bytes[:72]
+        password = password_bytes.decode('utf-8', errors='ignore')
+
+    try:
+        return pwd_context.hash(password)
+    except ValueError as e:
+        if "password cannot be longer than 72 bytes" in str(e):
+            # Further truncate if still too long
+            password = password[:70]  # Be more conservative
+            return pwd_context.hash(password)
+        raise e
 
 
 def authenticate_user(db: Session, email: str, password: str) -> Optional[User]:

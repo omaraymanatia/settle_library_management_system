@@ -6,7 +6,7 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 from app.db.session import get_db
-from app.services.auth_service import get_current_user
+from app.services.auth_service import get_current_user, restrict_to
 from app.services.reservation_service import reservation_service
 from app.schemas.reservation import ReservationResponse
 from app.models.user import User
@@ -121,7 +121,8 @@ async def get_book_reservations(
     )
 
     # Filter to only current user's reservations unless user is admin
-    if current_user.role.value != "admin":
+    from app.models.enums import RoleEnum
+    if current_user.role != RoleEnum.ADMIN:
         reservations = [r for r in reservations if r.user_id == current_user.id]
 
     return reservations
@@ -146,7 +147,8 @@ async def get_reservation(
         )
 
     # Check if user owns the reservation or is admin
-    if reservation.user_id != current_user.id and current_user.role.value != "admin":
+    from app.models.enums import RoleEnum
+    if reservation.user_id != current_user.id and current_user.role != RoleEnum.ADMIN:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Not authorized to view this reservation"
@@ -161,16 +163,10 @@ async def get_all_reservations(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=100),
     status_filter: Optional[ReservationStatusEnum] = Query(None),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(restrict_to("admin")),
     db: Session = Depends(get_db),
 ):
     """Get all reservations (Admin only)."""
-
-    if current_user.role.value != "admin":
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Admin access required"
-        )
 
     from app.crud.reservation import reservation as crud_reservation
 
@@ -186,16 +182,10 @@ async def get_all_reservations(
 
 @router.post("/expire-old", response_model=dict)
 async def expire_old_reservations(
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(restrict_to("admin")),
     db: Session = Depends(get_db),
 ):
     """Expire old reservations (Admin only)."""
-
-    if current_user.role.value != "admin":
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Admin access required"
-        )
 
     count = reservation_service.expire_old_reservations(db)
 

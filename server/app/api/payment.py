@@ -6,7 +6,7 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 from app.db.session import get_db
-from app.services.auth_service import get_current_user
+from app.services.auth_service import get_current_user, restrict_to
 from app.crud.payment import payment as crud_payment
 from app.schemas.payment import PaymentCreate, PaymentResponse, PaymentUpdate
 from app.models.user import User
@@ -24,7 +24,8 @@ async def create_payment(
     """Create a new payment."""
 
     # Ensure user can only create payments for themselves (unless admin)
-    if payment_data.user_id != current_user.id and current_user.role.value != "admin":
+    from app.models.enums import RoleEnum
+    if payment_data.user_id != current_user.id and current_user.role != RoleEnum.ADMIN:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Cannot create payment for another user"
@@ -73,7 +74,8 @@ async def get_payment(
         )
 
     # Check if user owns the payment or is admin
-    if payment.user_id != current_user.id and current_user.role.value != "admin":
+    from app.models.enums import RoleEnum
+    if payment.user_id != current_user.id and current_user.role != RoleEnum.ADMIN:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Not authorized to view this payment"
@@ -100,14 +102,15 @@ async def update_payment(
         )
 
     # Only admin or payment owner can update (for marking as paid by external processor)
-    if payment.user_id != current_user.id and current_user.role.value != "admin":
+    from app.models.enums import RoleEnum
+    if payment.user_id != current_user.id and current_user.role != RoleEnum.ADMIN:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Not authorized to update this payment"
         )
 
     # Prevent changing to PAID status unless admin (external payment processor should do this)
-    if payment_update.status == PaymentStatusEnum.PAID and current_user.role.value != "admin":
+    if payment_update.status == PaymentStatusEnum.PAID and current_user.role != RoleEnum.ADMIN:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Only payment processor can mark payment as paid"
@@ -124,16 +127,10 @@ async def get_all_payments(
     limit: int = Query(100, ge=1, le=100),
     payment_type: Optional[PaymentTypeEnum] = Query(None),
     status_filter: Optional[PaymentStatusEnum] = Query(None),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(restrict_to("admin")),
     db: Session = Depends(get_db),
 ):
     """Get all payments (Admin only)."""
-
-    if current_user.role.value != "admin":
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Admin access required"
-        )
 
     if payment_type:
         payments = crud_payment.get_by_type(db, payment_type=payment_type, skip=skip, limit=limit)
@@ -149,16 +146,10 @@ async def get_all_payments(
 async def update_payment_status(
     payment_id: int,
     new_status: PaymentStatusEnum,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(restrict_to("admin")),
     db: Session = Depends(get_db),
 ):
     """Update payment status (Admin only)."""
-
-    if current_user.role.value != "admin":
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Admin access required"
-        )
 
     payment = crud_payment.update_status(db, payment_id=payment_id, status=new_status)
 
@@ -173,16 +164,10 @@ async def update_payment_status(
 
 @router.get("/pending/count", response_model=dict)
 async def get_pending_payments_count(
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(restrict_to("admin")),
     db: Session = Depends(get_db),
 ):
     """Get count of pending payments (Admin only)."""
-
-    if current_user.role.value != "admin":
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Admin access required"
-        )
 
     pending_payments = crud_payment.get_pending_payments(db)
 
